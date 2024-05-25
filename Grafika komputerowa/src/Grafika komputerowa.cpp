@@ -282,13 +282,7 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	planeVAO.Delete();
-	planeVBO.Delete();
 	shaderProgram.Delete();
-	lightEBO.Delete();
-	lightVBO.Delete();
-	lightVAO.Delete();
 	lightShader.Delete();
 
 	glfwDestroyWindow(window);

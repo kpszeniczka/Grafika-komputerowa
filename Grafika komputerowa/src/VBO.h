@@ -10,9 +10,9 @@ public:
 	GLuint ID;
 	VBO(const std::vector<Vertex>& vertices);
 	VBO(const float* vertices, GLsizeiptr size);
+	~VBO();
 	void Bind();
 	void Unbind();
-	void Delete();
 };
 
 #endif

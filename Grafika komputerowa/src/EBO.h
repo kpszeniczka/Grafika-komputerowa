@@ -8,9 +8,9 @@ class EBO
 public:
 	GLuint ID;
 	EBO(const unsigned int* indices, unsigned int size);
+	~EBO();
 	void Bind();
 	void Unbind();
-	void Delete();
 };
 
 #endif
