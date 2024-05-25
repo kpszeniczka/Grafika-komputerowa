@@ -14,6 +14,7 @@
 #include "VBO.h"
 #include "EBO.h"
 #include "OBJLoader.h"
+#include "Random.h"
 
 const unsigned int width = 800;
 const unsigned int height = 800;
@@ -82,9 +83,12 @@ int main()
 	gladLoadGL();
 	glViewport(0, 0, width, width);
 
+	srand(time(NULL));
+
 	Shader shaderProgram("res/shader/default.vert", "res/shader/default.frag");
-	
+	Shader cloudProgram("res/shader/cloud.vert", "res/shader/cloud.frag");
 	Shader lightShader("res/shader/light.vert", "res/shader/light.frag");
+	
 	VAO lightVAO;
 	lightVAO.Bind();
 	VBO lightVBO(lightVertices, sizeof(lightVertices));
@@ -145,16 +149,37 @@ int main()
 	cloudVAO.Unbind();
 	cloudVBO.Unbind();
 
-	glm::vec3 cloudPos1 = glm::vec3(1.0f, 0.0f, -4.0f);
-	glm::vec3 cloudPos2 = glm::vec3(-2.0f, 0.0f, 3.0f);
-	glm::vec3 cloudPos3 = glm::vec3(3.0f, 0.0f, -2.0f);
-	glm::vec3 cloudPos4 = glm::vec3(-4.0f, 0.0f, 1.0f);
+	glm::vec3 cloudPos1 = glm::vec3(Random::GetPosition());
+	glm::vec3 cloudPos2 = glm::vec3(Random::GetPosition());
+	glm::vec3 cloudPos3 = glm::vec3(Random::GetPosition());
+	glm::vec3 cloudPos4 = glm::vec3(Random::GetPosition());
 
+	glm::vec3 cloudScale1 = Random::GetScale();
+	glm::vec3 cloudScale2 = Random::GetScale();
+	glm::vec3 cloudScale3 = Random::GetScale();
+	glm::vec3 cloudScale4 = Random::GetScale();
+
+	glm::vec3 cloudRotation1 = Random::GetRotation();
+	glm::vec3 cloudRotation2 = Random::GetRotation();
+	glm::vec3 cloudRotation3 = Random::GetRotation();
+	glm::vec3 cloudRotation4 = Random::GetRotation();
+
+	float cloudAlpha1 = Random::GetAlpha();
+	float cloudAlpha2 = Random::GetAlpha();
+	float cloudAlpha3 = Random::GetAlpha();
+	float cloudAlpha4 = Random::GetAlpha();
 
 	glm::mat4 cloudModel1 = glm::translate(glm::mat4(1.0f), cloudPos1);
+	cloudModel1 = glm::rotate(cloudModel1, glm::radians(Random::GetAngle()), cloudRotation1);
+
 	glm::mat4 cloudModel2 = glm::translate(glm::mat4(1.0f), cloudPos2);
+	cloudModel2 = glm::rotate(cloudModel2, glm::radians(Random::GetAngle()), cloudRotation2);
+
 	glm::mat4 cloudModel3 = glm::translate(glm::mat4(1.0f), cloudPos3);
+	cloudModel3 = glm::rotate(cloudModel3, glm::radians(Random::GetAngle()), cloudRotation3);
+
 	glm::mat4 cloudModel4 = glm::translate(glm::mat4(1.0f), cloudPos4);
+	cloudModel4 = glm::rotate(cloudModel4, glm::radians(Random::GetAngle()), cloudRotation4);
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	glm::vec3 cubePos = glm::vec3(2.0f, 2.0f, 0.0f);
@@ -195,11 +220,14 @@ int main()
 		// Update camera
 
 		camera.Inputs(window);
+		camera.updateMatrix(45.0f, 0.1f, 1000.0f);
+
 		shaderProgram.Activate();
 		camera.Matrix(shaderProgram, "camMatrix");
-		camera.updateMatrix(45.0f, 0.1f, 1000.0f);
 		lightShader.Activate();
 		camera.Matrix(lightShader, "camMatrix");
+		cloudProgram.Activate();
+		camera.Matrix(cloudProgram, "camMatrix");
 
 		// Render plane
 		shaderProgram.Activate();
@@ -215,7 +243,9 @@ int main()
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
 		planeVAO.Unbind();
+
 		// Render engine
+
 		shaderProgram.Activate();
 		Dzialaj.Bind();
 		engineVAO.Bind();
@@ -229,43 +259,41 @@ int main()
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glDrawArrays(GL_TRIANGLES, 0, smiglo.size());
 		engineVAO.Unbind();
+
 		// Render clouds
 
-		shaderProgram.Activate();
-		Dzialaj.Bind();
+		cloudProgram.Activate();
 		cloudVAO.Bind();
 
 		Motion(deltaTime, cloudPos1);
 		cloudModel1 = glm::translate(glm::mat4(1.0f), cloudPos1);
-		cloudModel1 = glm::scale(cloudModel1, glm::vec3(0.3));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel1));
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		cloudModel1 = glm::scale(cloudModel1, cloudScale1);
+		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel1));
+		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha1);
 		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
 
 		Motion(deltaTime, cloudPos2);
 		cloudModel2 = glm::translate(glm::mat4(1.0f), cloudPos2);
-		cloudModel2 = glm::scale(cloudModel2, glm::vec3(0.4));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel2));
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		cloudModel2 = glm::scale(cloudModel2, cloudScale2);
+		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel2));
+		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha2);
 		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
 
 		Motion(deltaTime, cloudPos3);
 		cloudModel3 = glm::translate(glm::mat4(1.0f), cloudPos3);
-		cloudModel3 = glm::scale(cloudModel3, glm::vec3(0.5));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel3));
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		cloudModel3 = glm::scale(cloudModel3, cloudScale3);
+		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel3));
+		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha3);
 		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
 
 		Motion(deltaTime, cloudPos4);
 		cloudModel4 = glm::translate(glm::mat4(1.0f), cloudPos4);
-		cloudModel4 = glm::scale(cloudModel4, glm::vec3(0.3));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel4));
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		cloudModel4 = glm::scale(cloudModel4, cloudScale4);
+		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel4));
+		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha4);
 		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
+
+		cloudVAO.Unbind();
 
 		// Render light
 		circularMotion(deltaTime, cubePos);
