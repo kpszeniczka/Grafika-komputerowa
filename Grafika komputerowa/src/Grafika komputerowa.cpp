@@ -2,7 +2,8 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include <vector>
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "plane.h"
 #include "Cylinder.h"
@@ -24,15 +25,16 @@ float lightSpeed = 0.5f;   // Szybkość obrotu światła (radiany na sekundę)
 float lightAngle = 0.0f;   // Początkowy kąt w radianach
 
 // Function to update light position
-void updateLightPosition(float deltaTime, glm::vec3& lightPos) {
+static void circularMotion(float deltaTime, glm::vec3& position) {
 	lightAngle += lightSpeed * deltaTime;
-	if (lightAngle > 2 * 3.14159265358979323846f) {
-		lightAngle -= 2 * 3.14159265358979323846f;
+
+	if (lightAngle > 2 * M_PI) {
+		lightAngle -= 2 * M_PI;
 	}
 
-	lightPos.x = lightRadius * cos(lightAngle);
-	lightPos.y = lightRadius * sin(lightAngle);
-	lightPos.z = lightHeight;
+	position.x = lightRadius * cos(lightAngle);
+	position.y = lightRadius * sin(lightAngle);
+	position.z = lightHeight;
 }
 
 GLfloat lightVertices[] = {
@@ -87,7 +89,7 @@ int main()
 	lightVBO.Unbind();
 	lightEBO.Unbind();
 
-	Camera camera(width, height, glm::vec3(4.0f, 4.0f, 50.0f));
+	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 8.0f));
 
 	std::vector<Vertex> samolot = loadOBJ("res/model/samolot.obj");
 
@@ -103,65 +105,80 @@ int main()
 	VBO.Unbind();
 
 	glm::vec3 planePos = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	glm::mat4 planeModel = glm::mat4(1.0f);
 	planeModel = glm::translate(planeModel, planePos);
 
-	// Time tracking variables for light animation
-	float lastFrameTime = glfwGetTime();
-	float currentFrameTime;
-	float deltaTime;
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
-	glm::mat4 lightModel = glm::mat4(1.0f);
-	lightModel = glm::translate(lightModel, lightPos);
-	glm::vec3 cubePos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 cubePos = glm::vec3(2.0f, 2.0f, 0.0f);
 	glm::mat4 cubeModel = glm::mat4(1.0f);
 	cubeModel = glm::translate(cubeModel, cubePos);
 	
-
 	lightShader.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 
 	shaderProgram.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(planeModel));
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
 
 	Texture Dzialaj("res/textures/slime.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	Dzialaj.texUnit(shaderProgram, "tex0", 0);
 
+	// Time tracking variables for light animation
+	float lastFrameTime = glfwGetTime();
+	float currentFrameTime;
+	float deltaTime;
+
+	float currentAngle = 0.0f;
+
 	while (!glfwWindowShouldClose(window))
 	{
+		// Delta time
 		currentFrameTime = glfwGetTime();
 		deltaTime = currentFrameTime - lastFrameTime;
 		lastFrameTime = currentFrameTime;
-		updateLightPosition(deltaTime, lightPos);
 
-		shaderProgram.Activate();
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		// Clear
 
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Update camera
+
 		camera.Inputs(window);
+		shaderProgram.Activate();
 		camera.Matrix(shaderProgram, "camMatrix");
 		camera.updateMatrix(45.0f, 0.1f, 1000.0f);
-		Dzialaj.Bind();
-		VAO.Bind();
-		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
-		// Activate the shader for the light cube
 		lightShader.Activate();
-		// Update light position and model transformation in the light shader
-		glm::mat4 lightModel = glm::mat4(1.0f);
-		lightModel = glm::translate(lightModel, lightPos);
-		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
-		// Export the camMatrix to the Vertex Shader of the light cube
 		camera.Matrix(lightShader, "camMatrix");
 
-		// Bind the VAO so OpenGL knows to use it
+		// Render plane
+		shaderProgram.Activate();
+		Dzialaj.Bind();
+		VAO.Bind();
+
+		circularMotion(deltaTime, planePos);
+		planeModel = glm::translate(glm::mat4(1.0f), planePos);
+
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(planeModel));
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
+
+		// Render light
+		circularMotion(deltaTime, cubePos);
+		lightShader.Activate();
 		lightVAO.Bind();
-		//glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+		cubeModel = glm::translate(glm::mat4(1.0f), cubePos);
+		cubeModel = glm::rotate(glm::mat4(1.0f), glm::radians(currentAngle), glm::vec3(1, 1, 1));
+		currentAngle += 10 * deltaTime;
+
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
+		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+		// Swap buffers
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -174,7 +191,9 @@ int main()
 	lightVBO.Delete();
 	lightVAO.Delete();
 	lightShader.Delete();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
+
 	return 0;
 }
