@@ -1,87 +1,103 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Pliki źródłowe">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="vendor\GLFW">
+      <UniqueIdentifier>{D27667C1-3E2C-E0B6-C720-DA8D33D5D6BA}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki zasobów">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="vendor\KHR">
+      <UniqueIdentifier>{A723C5A8-93DB-06F6-FCE2-DF51E8B9A1E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad">
+      <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm">
+      <UniqueIdentifier>{829FC5A8-6E57-07F6-D75E-E051C335A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm\detail">
+      <UniqueIdentifier>{04D16468-70E7-62FE-B95E-EE1F25B43386}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm\simd">
+      <UniqueIdentifier>{1EFDF202-8A88-60C7-9399-E3BBFFA3BCC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Grafika komputerowa.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="EBO.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="shaderClass.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="VAO.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="VBO.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="stb.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Cylinder.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="plane.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Camera.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Cylinder.h" />
+    <ClInclude Include="src\EBO.h" />
+    <ClInclude Include="src\OBJLoader.h" />
+    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\VAO.h" />
+    <ClInclude Include="src\VBO.h" />
+    <ClInclude Include="src\plane.h" />
+    <ClInclude Include="src\shaderClass.h" />
+    <ClInclude Include="src\vendor\GLFW\glfw3.h">
+      <Filter>vendor\GLFW</Filter>
     </ClInclude>
-    <ClInclude Include="EBO.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\GLFW\glfw3native.h">
+      <Filter>vendor\GLFW</Filter>
     </ClInclude>
-    <ClInclude Include="shaderClass.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\KHR\khrplatform.h">
+      <Filter>vendor\KHR</Filter>
     </ClInclude>
-    <ClInclude Include="VAO.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glad\glad.h">
+      <Filter>vendor\glad</Filter>
     </ClInclude>
-    <ClInclude Include="VBO.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glm\simd\common.h">
+      <Filter>vendor\glm\simd</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glm\simd\exponential.h">
+      <Filter>vendor\glm\simd</Filter>
     </ClInclude>
-    <ClInclude Include="Cylinder.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glm\simd\geometric.h">
+      <Filter>vendor\glm\simd</Filter>
     </ClInclude>
-    <ClInclude Include="plane.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glm\simd\integer.h">
+      <Filter>vendor\glm\simd</Filter>
     </ClInclude>
-    <ClInclude Include="OBJLoader.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="src\vendor\glm\simd\matrix.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\glm\simd\neon.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\glm\simd\packing.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\glm\simd\platform.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\glm\simd\trigonometric.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\glm\simd\vector_relational.h">
+      <Filter>vendor\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\stb\stb_image.h">
+      <Filter>vendor\stb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.frag" />
-    <None Include="default.vert" />
-    <None Include="Light.frag" />
-    <None Include="Light.vert" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Cylinder.cpp" />
+    <ClCompile Include="src\EBO.cpp" />
+    <ClCompile Include="src\Grafika komputerowa.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\VAO.cpp" />
+    <ClCompile Include="src\VBO.cpp" />
+    <ClCompile Include="src\plane.cpp" />
+    <ClCompile Include="src\shaderClass.cpp" />
+    <ClCompile Include="src\vendor\glm\detail\glm.cpp">
+      <Filter>vendor\glm\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\stb\stb_image.cpp">
+      <Filter>vendor\stb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vendor\glad\glad.c" />
   </ItemGroup>
 </Project>
