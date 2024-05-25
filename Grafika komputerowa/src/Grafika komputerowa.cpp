@@ -174,6 +174,7 @@ int main()
 	glm::vec3 floorPos = glm::vec3(0.0f, -5.0f, 0.0f);
 	glm::mat4 floorModel = glm::mat4(1.0f);
 	floorModel = glm::translate(floorModel, floorPos);
+	floorModel = glm::scale(floorModel, glm::vec3(3.0f));
 
 	floorShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
@@ -258,9 +259,7 @@ int main()
 		// Render clouds
 
 		for (auto& chmurka: chmurki)
-		{
 			chmurka.draw(cloudProgram, deltaTime);
-		}
 		
 		// Render floor
 
