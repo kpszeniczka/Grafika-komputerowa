@@ -1,5 +1,4 @@
-﻿
-#include<iostream>
+﻿#include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include <vector>
@@ -77,52 +76,58 @@ int main()
 	glViewport(0, 0, width, width);
 
 	Shader shaderProgram("default.vert", "default.frag");
-	
+
 	Shader lightShader("light.vert", "light.frag");
 	VAO lightVAO;
 	lightVAO.Bind();
 	VBO lightVBO(lightVertices, sizeof(lightVertices));
 	EBO lightEBO(lightIndices, sizeof(lightIndices));
-	lightVAO.LinkVBO(lightVBO, 0, 3, 3, 0);
+	lightVAO.LinkVBO(lightVBO, 0, 3, 3 * sizeof(float), 0);
 	lightVAO.Unbind();
 	lightVBO.Unbind();
 	lightEBO.Unbind();
 
 	Camera camera(width, height, glm::vec3(4.0f, 4.0f, 50.0f));
 
-	std::vector<Vertex> samolot = loadOBJ("SAMOLOT.obj");
+	std::vector<Vertex> samolot = loadOBJ("samolot.obj");
 
 	VAO VAO;
 	VAO.Bind();
 	VBO VBO(samolot);
 
-	VAO.LinkVBO(VBO, 0, 3, 8, 0);
-	VAO.LinkVBO(VBO, 3, 3, 8, 3);
-	VAO.LinkVBO(VBO, 2, 2, 8, 6);
+	VAO.LinkVBO(VBO, 0, 3, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
+	VAO.LinkVBO(VBO, 2, 2, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texcoord));
+	VAO.LinkVBO(VBO, 3, 3, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normals));
 
 	VAO.Unbind();
 	VBO.Unbind();
+
+	glm::vec3 planePos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::mat4 planeModel = glm::mat4(1.0f);
+	planeModel = glm::translate(planeModel, planePos);
 
 	// Time tracking variables for light animation
 	float lastFrameTime = glfwGetTime();
 	float currentFrameTime;
 	float deltaTime;
-	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 0.4f, 1.0f);
+	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
 	glm::mat4 lightModel = glm::mat4(1.0f);
 	lightModel = glm::translate(lightModel, lightPos);
 	glm::vec3 cubePos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 cubeModel = glm::mat4(1.0f);
 	cubeModel = glm::translate(cubeModel, cubePos);
+	
 
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 
 	shaderProgram.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(planeModel));
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
 
 	Texture Dzialaj("slime.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	Dzialaj.texUnit(shaderProgram, "tex0", 0);
@@ -137,7 +142,7 @@ int main()
 		shaderProgram.Activate();
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-		                                        
+
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		camera.Inputs(window);
@@ -145,7 +150,7 @@ int main()
 		camera.updateMatrix(45.0f, 0.1f, 1000.0f);
 		Dzialaj.Bind();
 		VAO.Bind();
-		glDrawArrays(GL_TRIANGLES, 0, samolot.size() / 8);
+		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
 		// Activate the shader for the light cube
 		lightShader.Activate();
 		// Update light position and model transformation in the light shader

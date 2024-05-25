@@ -20,9 +20,9 @@ struct Vertex {
 };
 
 static std::vector<Vertex> loadOBJ(const char* file_name) {
-	std::vector<glm::vec3> vertexPosition;
-	std::vector<glm::vec2> vertexTexcoord;
-	std::vector<glm::vec3> vertexNormals;
+	std::vector<glm::fvec3> vertexPosition;
+	std::vector<glm::fvec2> vertexTexcoord;
+	std::vector<glm::fvec3> vertexNormals;
 
 	std::vector<GLuint> vertexPositionIndicies;
 	std::vector<GLuint> vertexTexcoordIndicies;
@@ -35,7 +35,7 @@ static std::vector<Vertex> loadOBJ(const char* file_name) {
 	std::string prefix = "";
 	glm::vec3 temp_vec3;
 	glm::vec2 temp_vec2;
-	GLuint temp_gluint = 0;
+	GLint temp_glint = 0;
 
 	if (!inFile.is_open()) {
 		throw "error";
@@ -60,15 +60,15 @@ static std::vector<Vertex> loadOBJ(const char* file_name) {
 		}
 		else if (prefix == "f") {
 			int counter = 0;
-			while (ss >> temp_gluint) {
+			while (ss >> temp_glint) {
 				if (counter == 0) {
-					vertexPositionIndicies.push_back(temp_gluint);
+					vertexPositionIndicies.push_back(temp_glint);
 				}
 				else if (counter == 1) {
-					vertexTexcoordIndicies.push_back(temp_gluint);
+					vertexTexcoordIndicies.push_back(temp_glint);
 				}
 				else if (counter == 2) {
-					vertexNormalsIndicies.push_back(temp_gluint);
+					vertexNormalsIndicies.push_back(temp_glint);
 				}
 				if (ss.peek() == '/') {
 					++counter;
@@ -86,14 +86,14 @@ static std::vector<Vertex> loadOBJ(const char* file_name) {
 		else {
 
 		}
-		vertices.reserve(vertexPositionIndicies.size());
+	}
+	vertices.resize(vertexPositionIndicies.size(), Vertex());
 
-		for (size_t i = 0; i < vertexPositionIndicies.size(); i++)
-		{
-			vertices.push_back(Vertex(vertexPosition[vertexPositionIndicies[i] - 1],
-				vertexTexcoord[vertexTexcoordIndicies[i] - 1],
-				vertexNormals[vertexNormalsIndicies[i] - 1]));
-		}
+	for (size_t i = 0; i < vertexPositionIndicies.size(); i++)
+	{
+		vertices[i].position = vertexPosition[vertexPositionIndicies[i] - 1];
+		vertices[i].texcoord = vertexTexcoord[vertexTexcoordIndicies[i] - 1];
+		vertices[i].normals = vertexNormals[vertexNormalsIndicies[i] - 1];
 	}
 	return vertices;
 }
