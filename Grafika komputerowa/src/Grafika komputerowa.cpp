@@ -192,8 +192,7 @@ int main()
 
 	Texture Dzialaj("res/textures/slime.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 	Dzialaj.texUnit(shaderProgram, "tex0", 0);
-	Texture Dzialaj2("res/textures/slime.png", GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-	Dzialaj2.texUnit(floorShader, "tex1", 0);
+	Dzialaj.texUnit(floorShader, "tex0", 0);
 
 	// Time tracking variables for light animation
 	float lastFrameTime = glfwGetTime();
