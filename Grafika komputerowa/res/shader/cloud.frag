@@ -3,8 +3,6 @@
 // Outputs colors in RGBA
 out vec4 FragColor;
 
-in vec3 position;
-
 uniform float alpha;
 
 void main()
