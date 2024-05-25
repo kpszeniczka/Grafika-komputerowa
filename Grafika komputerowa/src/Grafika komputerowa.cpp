@@ -15,6 +15,9 @@
 #include "EBO.h"
 #include "OBJLoader.h"
 #include "Random.h"
+#include "cloud.h"
+
+#define LICZBACHMUREK 20
 
 const unsigned int width = 800;
 const unsigned int height = 800;
@@ -26,8 +29,8 @@ float lightSpeed = 0.5f;   // Szybkość obrotu światła (radiany na sekundę)
 float lightAngle = 0.0f;   // Początkowy kąt w radianach
 
 static void Motion(float deltaTime, glm::vec3& position) {
-	position.x = position.x + deltaTime * 0.1;
-	position.z = position.z + deltaTime * 0.1;
+	position.x = position.x - deltaTime * 0.5;
+	position.z = position.z - deltaTime * 0.5;
 }
 
 // Function to update light position
@@ -64,7 +67,18 @@ GLuint lightIndices[] = {
 	1, 5, 4, 1, 4, 0   // Bottom face
 };
 
+GLfloat floorVertices[] = {
+	10.0f,  0.0f, 10.0f,    0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+	-10.0f, 0.0f, 10.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+	10.0f,  0.0f, -10.0f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-10.0f, 0.0f, -10.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+};
 
+GLuint floorIndices[] = {
+	2,1,0,
+	1,2,3
+};
+ 
 int main()
 {
 	// Initialize GLFW
@@ -83,12 +97,24 @@ int main()
 	gladLoadGL();
 	glViewport(0, 0, width, width);
 
-	srand(time(NULL));
-
 	Shader shaderProgram("res/shader/default.vert", "res/shader/default.frag");
 	Shader cloudProgram("res/shader/cloud.vert", "res/shader/cloud.frag");
 	Shader lightShader("res/shader/light.vert", "res/shader/light.frag");
-	
+	Shader floorShader("res/shader/floor.vert", "res/shader/floor.frag");
+
+	VAO floorVAO;
+	floorVAO.Bind();
+	VBO floorVBO(floorVertices, sizeof(floorVertices));
+	EBO floorEBO(floorIndices, sizeof(floorIndices));
+
+	floorVAO.LinkVBO(floorVBO, 0, 3, 8 * sizeof(float), (void*) 0);
+	floorVAO.LinkVBO(floorVBO, 3, 3, 8 * sizeof(float), (void*) 3);
+	floorVAO.LinkVBO(floorVBO, 2, 2, 8 * sizeof(float), (void*) 6);
+
+	floorVAO.Unbind();
+	floorVBO.Unbind();
+	floorEBO.Unbind();
+
 	VAO lightVAO;
 	lightVAO.Bind();
 	VBO lightVBO(lightVertices, sizeof(lightVertices));
@@ -136,56 +162,22 @@ int main()
 	glm::mat4 engineModel = glm::mat4(1.0f);
 	engineModel = glm::translate(engineModel, enginePos);
 
-	std::vector<Vertex> cloud = loadOBJ("res/model/chmurka.obj");
-
-	VAO cloudVAO;
-	cloudVAO.Bind();
-	VBO cloudVBO(cloud);
-
-	cloudVAO.LinkVBO(cloudVBO, 0, 3, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
-	cloudVAO.LinkVBO(cloudVBO, 2, 2, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texcoord));
-	cloudVAO.LinkVBO(cloudVBO, 3, 3, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normals));
-
-	cloudVAO.Unbind();
-	cloudVBO.Unbind();
-
-	glm::vec3 cloudPos1 = glm::vec3(Random::GetPosition());
-	glm::vec3 cloudPos2 = glm::vec3(Random::GetPosition());
-	glm::vec3 cloudPos3 = glm::vec3(Random::GetPosition());
-	glm::vec3 cloudPos4 = glm::vec3(Random::GetPosition());
-
-	glm::vec3 cloudScale1 = Random::GetScale();
-	glm::vec3 cloudScale2 = Random::GetScale();
-	glm::vec3 cloudScale3 = Random::GetScale();
-	glm::vec3 cloudScale4 = Random::GetScale();
-
-	glm::vec3 cloudRotation1 = Random::GetRotation();
-	glm::vec3 cloudRotation2 = Random::GetRotation();
-	glm::vec3 cloudRotation3 = Random::GetRotation();
-	glm::vec3 cloudRotation4 = Random::GetRotation();
-
-	float cloudAlpha1 = Random::GetAlpha();
-	float cloudAlpha2 = Random::GetAlpha();
-	float cloudAlpha3 = Random::GetAlpha();
-	float cloudAlpha4 = Random::GetAlpha();
-
-	glm::mat4 cloudModel1 = glm::translate(glm::mat4(1.0f), cloudPos1);
-	cloudModel1 = glm::rotate(cloudModel1, glm::radians(Random::GetAngle()), cloudRotation1);
-
-	glm::mat4 cloudModel2 = glm::translate(glm::mat4(1.0f), cloudPos2);
-	cloudModel2 = glm::rotate(cloudModel2, glm::radians(Random::GetAngle()), cloudRotation2);
-
-	glm::mat4 cloudModel3 = glm::translate(glm::mat4(1.0f), cloudPos3);
-	cloudModel3 = glm::rotate(cloudModel3, glm::radians(Random::GetAngle()), cloudRotation3);
-
-	glm::mat4 cloudModel4 = glm::translate(glm::mat4(1.0f), cloudPos4);
-	cloudModel4 = glm::rotate(cloudModel4, glm::radians(Random::GetAngle()), cloudRotation4);
+	std::vector<Cloud> chmurki;
+	
+	chmurki.resize(LICZBACHMUREK);
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 cubePos = glm::vec3(2.0f, 2.0f, 0.0f);
+	glm::vec3 cubePos = glm::vec3(10.0f, 10.0f, 0.0f);
 	glm::mat4 cubeModel = glm::mat4(1.0f);
 	cubeModel = glm::translate(cubeModel, cubePos);
 	
+	glm::vec3 floorPos = glm::vec3(0.0f, -5.0f, 0.0f);
+	glm::mat4 floorModel = glm::mat4(1.0f);
+	floorModel = glm::translate(floorModel, floorPos);
+
+	floorShader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
+
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
 	glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
@@ -214,7 +206,7 @@ int main()
 
 		// Clear
 
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.32f, 0.67f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Update camera
@@ -228,6 +220,9 @@ int main()
 		camera.Matrix(lightShader, "camMatrix");
 		cloudProgram.Activate();
 		camera.Matrix(cloudProgram, "camMatrix");
+		floorShader.Activate();
+		camera.Matrix(floorShader, "camMatrix");
+
 
 		// Render plane
 		shaderProgram.Activate();
@@ -252,7 +247,7 @@ int main()
 
 		engineModel = glm::translate(glm::mat4(1.0f), enginePos);
 		engineModel = glm::rotate(engineModel, glm::radians(currentAngle), glm::vec3(0, 0, 1));
-		currentAngle += 180 * deltaTime;
+		currentAngle += 360 * deltaTime;
 
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(engineModel));
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
@@ -262,41 +257,22 @@ int main()
 
 		// Render clouds
 
-		cloudProgram.Activate();
-		cloudVAO.Bind();
+		for (auto& chmurka: chmurki)
+		{
+			chmurka.draw(cloudProgram, deltaTime);
+		}
+		
+		// Render floor
 
-		Motion(deltaTime, cloudPos1);
-		cloudModel1 = glm::translate(glm::mat4(1.0f), cloudPos1);
-		cloudModel1 = glm::scale(cloudModel1, cloudScale1);
-		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel1));
-		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha1);
-		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
+		floorShader.Activate();
+		floorVAO.Bind();
 
-		Motion(deltaTime, cloudPos2);
-		cloudModel2 = glm::translate(glm::mat4(1.0f), cloudPos2);
-		cloudModel2 = glm::scale(cloudModel2, cloudScale2);
-		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel2));
-		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha2);
-		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
+		glDrawElements(GL_TRIANGLES, sizeof(floorIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-		Motion(deltaTime, cloudPos3);
-		cloudModel3 = glm::translate(glm::mat4(1.0f), cloudPos3);
-		cloudModel3 = glm::scale(cloudModel3, cloudScale3);
-		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel3));
-		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha3);
-		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
-
-		Motion(deltaTime, cloudPos4);
-		cloudModel4 = glm::translate(glm::mat4(1.0f), cloudPos4);
-		cloudModel4 = glm::scale(cloudModel4, cloudScale4);
-		glUniformMatrix4fv(glGetUniformLocation(cloudProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(cloudModel4));
-		glUniform1f(glGetUniformLocation(cloudProgram.ID, "alpha"), cloudAlpha4);
-		glDrawArrays(GL_TRIANGLES, 0, cloud.size());
-
-		cloudVAO.Unbind();
+		floorVAO.Unbind();
 
 		// Render light
-		circularMotion(deltaTime, cubePos);
+		//circularMotion(deltaTime, cubePos);
 		lightShader.Activate();
 		lightVAO.Bind();
 
@@ -310,9 +286,6 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	shaderProgram.Delete();
-	lightShader.Delete();
-
 	glfwDestroyWindow(window);
 	glfwTerminate();
 

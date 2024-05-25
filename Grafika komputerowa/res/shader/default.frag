@@ -30,7 +30,7 @@ void main()
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
 	vec3 lightDirection = normalize(lightPos - crntPos);
-	float diffuse = max(dot(normal, lightDirection), 0.4f);
+	float diffuse = max(dot(normal, lightDirection), 0.2f);
 
 	// specular lighting
 	float specularLight = 0.0f;
