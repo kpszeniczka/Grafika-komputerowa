@@ -68,10 +68,10 @@ GLuint lightIndices[] = {
 };
 
 GLfloat floorVertices[] = {
-	10.0f,  0.0f, 10.0f,    0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-	-10.0f, 0.0f, 10.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	10.0f,  0.0f, -10.0f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	-10.0f, 0.0f, -10.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+	0.5f,  0.0f, 0.5f,    0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+	-0.5f, 0.0f, 0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+	0.5f,  0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 };
 
 GLuint floorIndices[] = {
@@ -178,6 +178,8 @@ int main()
 
 	floorShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
+	glUniform4f(glGetUniformLocation(floorShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform3f(glGetUniformLocation(floorShader.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
 
 	lightShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
@@ -190,6 +192,7 @@ int main()
 
 	Texture Dzialaj("res/textures/slime.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	Dzialaj.texUnit(shaderProgram, "tex0", 0);
+	Dzialaj.texUnit(floorShader, "tex0", 0);
 
 	// Time tracking variables for light animation
 	float lastFrameTime = glfwGetTime();
@@ -264,8 +267,11 @@ int main()
 		// Render floor
 
 		floorShader.Activate();
+		Dzialaj.Bind();
 		floorVAO.Bind();
 
+		glUniform3f(glGetUniformLocation(floorShader.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
+		glUniform3f(glGetUniformLocation(floorShader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glDrawElements(GL_TRIANGLES, sizeof(floorIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		floorVAO.Unbind();
