@@ -5,8 +5,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "plane.h"
-#include "Cylinder.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "shaderClass.h"
@@ -201,6 +199,43 @@ int main()
 
 	float currentAngle = 0.0f;
 
+	// Shadows
+	Shader shadowProgram("res/shader/shadow.vert", "res/shader/shadow.frag");
+
+	int shadowWidth = 2048, shadowHeight = 2048;
+
+	unsigned int shadowTextureID;
+	glGenTextures(1, &shadowTextureID);
+	glBindTexture(GL_TEXTURE_2D, shadowTextureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	unsigned int shadowFrameID;
+	glGenFramebuffers(1, &shadowFrameID);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameID);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTextureID, 0);
+
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	float clampColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+
+	float aspect = (float)shadowWidth / (float)shadowHeight;
+	float near = 0.1f;
+	float far = 1000.0f;
+
+	glm::mat4 perspectiveProjection = glm::perspective(glm::radians(45.0f), aspect, near, far);
+	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightProjection = perspectiveProjection * lightView;
+
+	shadowProgram.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Delta time
@@ -227,10 +262,33 @@ int main()
 		floorShader.Activate();
 		camera.Matrix(floorShader, "camMatrix");
 
+		// Shadows
+
+		glViewport(0, 0, shadowWidth, shadowHeight);
+		glBindBuffer(GL_FRAMEBUFFER, shadowFrameID);
+
+		glClearColor(0.32f, 0.67f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shadowProgram.Activate();
+		planeVAO.Bind();
+		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
+		engineVAO.Bind();
+		glDrawArrays(GL_TRIANGLES, 0, smiglo.size());
+
+		glBindBuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, width, height);
+
+		glClearColor(0.32f, 0.67f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// Render floor
 
 		floorShader.Activate();
-		Dzialaj.Bind();
+		glBindTexture(GL_TEXTURE_2D, shadowTextureID);
+		glActiveTexture(GL_TEXTURE1);
+		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 1);
+		Dzialaj.Bind(0);
 		floorVAO.Bind();
 
 		glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
@@ -239,7 +297,6 @@ int main()
 		glDrawElements(GL_TRIANGLES, sizeof(floorIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		floorVAO.Unbind();
-
 
 		// Render plane
 		shaderProgram.Activate();

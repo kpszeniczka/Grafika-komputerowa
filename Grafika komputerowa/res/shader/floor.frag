@@ -22,6 +22,8 @@ uniform vec3 lightPos;
 // Gets the position of the camera from the main function
 uniform vec3 camPos;
 
+uniform sampler2D shadowMap;
+
 void main()
 {
 	// ambient lighting
@@ -42,4 +44,7 @@ void main()
 	// outputs final color
 	FragColor = texture(tex0, texCoord) * lightColor * (diffuse + ambient + specular);
 	FragColor = vec4(FragColor.rgb,1.0f);
+
+	float depthValue = texture(shadowMap, texCoord).r;
+    FragColor = vec4(vec3(depthValue * 10.0), 1.0);
 }
