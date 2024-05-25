@@ -68,10 +68,10 @@ GLuint lightIndices[] = {
 };
 
 GLfloat floorVertices[] = {
-	0.5f,  0.0f, 0.5f,   0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-	-0.5f, 0.0f, 0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	0.5f,  0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	-0.5f, 0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+	0.5f,  0.0f, 0.5f,    0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+	-0.5f, 0.0f, 0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	0.5f,  0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+	-0.5f, 0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
 };
 
 GLuint floorIndices[] = {
@@ -108,8 +108,8 @@ int main()
 	EBO floorEBO(floorIndices, sizeof(floorIndices));
 
 	floorVAO.LinkVBO(floorVBO, 0, 3, 8 * sizeof(float), (void*) 0);
-	floorVAO.LinkVBO(floorVBO, 3, 3, 8 * sizeof(float), (void*) 3);
-	floorVAO.LinkVBO(floorVBO, 2, 2, 8 * sizeof(float), (void*) 6);
+	floorVAO.LinkVBO(floorVBO, 3, 3, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	floorVAO.LinkVBO(floorVBO, 2, 2, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
 	floorVAO.Unbind();
 	floorVBO.Unbind();
@@ -174,7 +174,7 @@ int main()
 	glm::vec3 floorPos = glm::vec3(0.0f, -5.0f, 0.0f);
 	glm::mat4 floorModel = glm::mat4(1.0f);
 	floorModel = glm::translate(floorModel, floorPos);
-	//floorModel = glm::scale(floorModel, glm::vec3(3.0f));
+	floorModel = glm::scale(floorModel, glm::vec3(100.0f));
 
 	floorShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
@@ -228,6 +228,19 @@ int main()
 		floorShader.Activate();
 		camera.Matrix(floorShader, "camMatrix");
 
+		// Render floor
+
+		floorShader.Activate();
+		Dzialaj.Bind();
+		floorVAO.Bind();
+
+		glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
+		glUniform3f(glGetUniformLocation(floorShader.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
+		glUniform3f(glGetUniformLocation(floorShader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		glDrawElements(GL_TRIANGLES, sizeof(floorIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+		floorVAO.Unbind();
+
 
 		// Render plane
 		shaderProgram.Activate();
@@ -265,17 +278,6 @@ int main()
 		for (auto& chmurka: chmurki)
 			chmurka.draw(cloudProgram, deltaTime);
 		
-		// Render floor
-
-		floorShader.Activate();
-		Dzialaj2.Bind();
-		floorVAO.Bind();
-
-		glUniform3f(glGetUniformLocation(floorShader.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
-		glUniform3f(glGetUniformLocation(floorShader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
-		glDrawElements(GL_TRIANGLES, sizeof(floorIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
-
-		floorVAO.Unbind();
 
 		// Render light
 		//circularMotion(deltaTime, cubePos);
