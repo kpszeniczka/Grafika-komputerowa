@@ -10,14 +10,14 @@ project "Grafika komputerowa"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"vendor/glad/glad.h",
-		"vendor/glad/glad.c",
-		"vendor/glm/glm/**.hpp",
-		"vendor/glm/glm/**.cpp",
-		"vendor/KHR/**.h",
-		"vendor/GLFW/**.h",
-		"vendor/stb/**.h",
-		"vendor/stb/**.cpp"
+		"src/vendor/glad/glad.h",
+		"src/vendor/glad/glad.c",
+		"src/vendor/glm/glm/**.hpp",
+		"src/vendor/glm/glm/**.cpp",
+		"src/vendor/KHR/**.h",
+		"src/vendor/GLFW/**.h",
+		"src/vendor/stb/**.h",
+		"src/vendor/stb/**.cpp"
 	}
 
 	includedirs
