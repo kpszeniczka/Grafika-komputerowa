@@ -8,12 +8,12 @@ class Texture
 public:
 	GLuint ID;
 	GLenum type;
-	Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum
+	Texture(const char* image, GLenum texType, int slot, GLenum format, GLenum
 		pixelType);
 	// Assigns a texture unit to a texture
 	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 	// Binds a texture
-	void Bind();
+	void Bind(int slot = 0);
 	// Unbinds a texture
 	void Unbind();
 	// Deletes a texture

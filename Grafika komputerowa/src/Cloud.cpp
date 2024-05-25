@@ -2,7 +2,8 @@
 
 
 Cloud::Cloud() {
-	this->cloudVertices = loadOBJ("res/model/chmurka.obj");
+	static std::vector<Vertex> x = loadOBJ("res/model/chmurka.obj");
+	cloudVertices = x;
 	cloudVAO.Bind();
 	cloudVBO.Init(cloudVertices);
 	cloudVAO.LinkVBO(cloudVBO, 0, 3, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
