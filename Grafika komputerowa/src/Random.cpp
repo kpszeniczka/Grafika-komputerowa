@@ -4,9 +4,9 @@ glm::vec3& Random::GetPosition()
 {
     glm::vec3 temp{};
 
-    temp.x = GenerateNumber(-20.f, 20.f);
-    temp.y = GenerateNumber(-5.f, 5.f);
-    temp.z = GenerateNumber(-20.f, 20.f);
+    temp.x = GenerateNumber(-500.f, 500.f);
+    temp.y = GenerateNumber(-15.f, 15.f);
+    temp.z = GenerateNumber(-500.f, 500.f);
 
     return temp;
 }
@@ -15,9 +15,9 @@ glm::vec3& Random::GetScale()
 {
     glm::vec3 temp{};
 
-    temp.x = GenerateNumber(0.3f, 0.8f);
-    temp.y = GenerateNumber(0.3f, 0.8f);
-    temp.z = GenerateNumber(0.3f, 0.8f);
+    temp.x = GenerateNumber(1.0f, 5.0f);
+    temp.y = GenerateNumber(1.0f, 5.0f);
+    temp.z = GenerateNumber(1.0f, 5.0f);
 
     return temp;
 }
@@ -47,7 +47,7 @@ float Random::GetAlpha()
 
 float Random::GetSpeed() 
 {
-    float temp = GenerateNumber(0.01f, 0.2f);
+    float temp = GenerateNumber(1.0f, 5.0f);
     return temp;
 }
 

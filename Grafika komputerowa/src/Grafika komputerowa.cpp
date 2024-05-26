@@ -15,7 +15,7 @@
 #include "Random.h"
 #include "cloud.h"
 
-#define LICZBACHMUREK 20
+#define LICZBACHMUREK 500
 
 const unsigned int width = 800;
 const unsigned int height = 800;
@@ -122,7 +122,7 @@ int main()
 	lightVBO.Unbind();
 	lightEBO.Unbind();
 
-	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 8.0f));
+	Camera camera(width, height, glm::vec3(30.0f, 50.0f, 200.0f));
 
 	std::vector<Vertex> samolot = loadOBJ("res/model/samolot.obj");
 
@@ -141,6 +141,7 @@ int main()
 
 	glm::mat4 planeModel = glm::mat4(1.0f);
 	planeModel = glm::translate(planeModel, planePos);
+	planeModel = glm::scale(planeModel, glm::vec3(10.0f));
 
 	std::vector<Vertex> smiglo = loadOBJ("res/model/smiglo.obj");
 
@@ -155,24 +156,25 @@ int main()
 	engineVAO.Unbind();
 	engineVBO.Unbind();
 
-	glm::vec3 enginePos = glm::vec3(planePos.x, planePos.y, planePos.z-0.1f);
+	glm::vec3 enginePos = glm::vec3(planePos.x, planePos.y, planePos.z-1.0f);
 
 	glm::mat4 engineModel = glm::mat4(1.0f);
 	engineModel = glm::translate(engineModel, enginePos);
+	engineModel = glm::scale(engineModel, glm::vec3(10.0f));
 
 	std::vector<Cloud> chmurki;
 	
 	chmurki.resize(LICZBACHMUREK);
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 cubePos = glm::vec3(10.0f, 22.5f, 0.0f);
+	glm::vec3 cubePos = glm::vec3(500.0f, 800.5f, 0.0f);
 	glm::mat4 cubeModel = glm::mat4(1.0f);
 	cubeModel = glm::translate(cubeModel, cubePos);
 	
-	glm::vec3 floorPos = glm::vec3(0.0f, -5.0f, 0.0f);
+	glm::vec3 floorPos = glm::vec3(0.0f, -700.0f, 0.0f);
 	glm::mat4 floorModel = glm::mat4(1.0f);
 	floorModel = glm::translate(floorModel, floorPos);
-	floorModel = glm::scale(floorModel, glm::vec3(100.0f));
+	floorModel = glm::scale(floorModel, glm::vec3(10000.0f));
 
 	floorShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
@@ -188,9 +190,10 @@ int main()
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
 
-	Texture Dzialaj("res/textures/slime.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-	Dzialaj.texUnit(shaderProgram, "tex0", 0);
-	Dzialaj.texUnit(floorShader, "tex0", 0);
+	Texture Metal("res/textures/metal.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+	Metal.texUnit(shaderProgram, "tex0", 0);
+	Texture Trawa("res/textures/trawa.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+	Trawa.texUnit(floorShader, "tex0", 0);
 
 	// Time tracking variables for light animation
 	float lastFrameTime = glfwGetTime();
@@ -225,11 +228,11 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	float aspect = (float)shadowWidth / (float)shadowHeight;
-	float near = 18.5f;
+	float near = cubePos.y - 4.0f;
 	float far = floorPos.y;
 
 	glm::mat4 perspectiveProjection = glm::perspective(glm::radians(45.0f), aspect, near, far);
-	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, -50.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glm::mat4 lightProjection = perspectiveProjection * lightView;
 
@@ -254,7 +257,7 @@ int main()
 		// Update camera
 
 		camera.Inputs(window);
-		camera.updateMatrix(45.0f, 0.1f, 1000.0f);
+		camera.updateMatrix(45.0f, 0.1f, 10000.0f);
 
 		shaderProgram.Activate();
 		camera.Matrix(shaderProgram, "camMatrix");
@@ -287,7 +290,7 @@ int main()
 		// Render floor
 
 		floorShader.Activate();
-		Dzialaj.Bind();
+		Trawa.Bind();
 		glUniform1i(glGetUniformLocation(floorShader.ID, "textureSampler"), 0);
 
 		glActiveTexture(GL_TEXTURE1);
@@ -304,10 +307,9 @@ int main()
 
 		// Render plane
 		shaderProgram.Activate();
-		Dzialaj.Bind();
+		Metal.Bind();
 		planeVAO.Bind();
 
-		planeModel = glm::translate(glm::mat4(1.0f), planePos);
 		//planeModel = glm::rotate(planeModel, glm::radians(currentAngle), glm::vec3(0, 0, 1));
 		//currentAngle += 10 * deltaTime;
 		
@@ -320,12 +322,13 @@ int main()
 		// Render engine
 
 		shaderProgram.Activate();
-		Dzialaj.Bind();
+		Metal.Bind();
 		engineVAO.Bind();
 
 		engineModel = glm::translate(glm::mat4(1.0f), enginePos);
 		engineModel = glm::rotate(engineModel, glm::radians(currentAngle), glm::vec3(0, 0, 1));
-		currentAngle += 360 * deltaTime;
+		engineModel = glm::scale(engineModel, glm::vec3(10.0f));
+		currentAngle += 720 * deltaTime;
 
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(engineModel));
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), cubePos.x, cubePos.y, cubePos.z);
@@ -347,7 +350,6 @@ int main()
 		cubeModel = glm::translate(glm::mat4(1.0f), cubePos);
 
 		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(cubeModel));
-		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		// Swap buffers
 
