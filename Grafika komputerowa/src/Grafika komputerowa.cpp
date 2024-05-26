@@ -165,7 +165,7 @@ int main()
 	chmurki.resize(LICZBACHMUREK);
 
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 cubePos = glm::vec3(10.0f, 10.0f, 0.0f);
+	glm::vec3 cubePos = glm::vec3(10.0f, 22.5f, 0.0f);
 	glm::mat4 cubeModel = glm::mat4(1.0f);
 	cubeModel = glm::translate(cubeModel, cubePos);
 	
@@ -224,13 +224,18 @@ int main()
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::mat4 perspectiveProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 150.0f);
-	glm::mat4 lightView = glm::lookAt(20.0f * cubePos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	float aspect = (float)shadowWidth / (float)shadowHeight;
+	float near = 18.0f;
+	float far = floorPos.y;
+
+	glm::mat4 perspectiveProjection = glm::perspective(glm::radians(45.0f), aspect, near, far);
+	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 	glm::mat4 lightProjection = perspectiveProjection * lightView;
 
 	shadowProgram.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
-	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_Model"), 1, GL_FALSE, glm::value_ptr(planeModel));
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -266,10 +271,12 @@ int main()
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		shadowProgram.Activate();
-
 		planeVAO.Bind();
+		glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_Model"), 1, GL_FALSE, glm::value_ptr(planeModel));
 		glDrawArrays(GL_TRIANGLES, 0, samolot.size());
+
 		engineVAO.Bind();
+		glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_Model"), 1, GL_FALSE, glm::value_ptr(engineModel));
 		glDrawArrays(GL_TRIANGLES, 0, smiglo.size());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -279,9 +286,8 @@ int main()
 
 		floorShader.Activate();
 		glBindTexture(GL_TEXTURE_2D, shadowTextureID);
-		glActiveTexture(GL_TEXTURE1);
-		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 1);
-		Dzialaj.Bind(0);
+		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 0);
+		//Dzialaj.Bind(0);
 		floorVAO.Bind();
 
 		glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
