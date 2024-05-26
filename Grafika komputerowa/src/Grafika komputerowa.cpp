@@ -229,12 +229,15 @@ int main()
 	float far = floorPos.y;
 
 	glm::mat4 perspectiveProjection = glm::perspective(glm::radians(45.0f), aspect, near, far);
-	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 
 	glm::mat4 lightProjection = perspectiveProjection * lightView;
 
 	shadowProgram.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+	floorShader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+
 	
 
 	while (!glfwWindowShouldClose(window))
@@ -285,8 +288,11 @@ int main()
 		// Render floor
 
 		floorShader.Activate();
+		Dzialaj.Bind();
+		glUniform1i(glGetUniformLocation(floorShader.ID, "textureSampler"), 0);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, shadowTextureID);
-		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 0);
+		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 1);
 		//Dzialaj.Bind(0);
 		floorVAO.Bind();
 

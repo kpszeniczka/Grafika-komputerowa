@@ -1,23 +1,24 @@
 #version 330 core
 
-layout (location = 0) in vec3 aPos;
-layout (location = 2) in vec2 aTex;
-layout (location = 3) in vec3 aNormal;
+layout(location = 0) in vec3 position;
+layout(location = 3) in vec3 normals;
+layout(location = 2) in vec2 texCoords;
 
-
-out vec3 color;
-out vec2 texCoord;
-out vec3 Normal;
-out vec3 crntPos;
+out vec3 v_Position;
+out vec3 v_Normals;
+out vec2 v_TexCoord;
+out vec4 v_FragPositionLight;
 
 uniform mat4 camMatrix;
 uniform mat4 model;
+uniform mat4 u_LightProjection;
 
-
-void main()
+void main() 
 {
-	crntPos = vec3(model * vec4(aPos, 1.0f));
-	gl_Position = camMatrix * vec4(crntPos, 1.0);
-	texCoord = aTex;
-	Normal = aNormal;
+    gl_Position = camMatrix * model * vec4(position, 1.0f);
+
+    v_Position = (model * vec4(position, 1.0f)).xyz; // Transform to world space
+    v_Normals = mat3(transpose(inverse(model))) * normals; // Transform normals to world space
+    v_TexCoord = texCoords;
+    v_FragPositionLight = u_LightProjection * vec4(position, 1.0f);
 }
