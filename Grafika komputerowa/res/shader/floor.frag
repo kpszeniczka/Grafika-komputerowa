@@ -52,13 +52,13 @@ vec4 SpotLight(vec4 textureColor)
             {
                 float closestDepth = texture(shadowMap, lightCoords.xy + vec2(x, y) * pixelSize).r;
                 if (currentDepth > closestDepth + bias)
-                    shadow += 1.0f;     
+                    shadow += 1.0f;
             }    
         }
         shadow /= pow((sampleRadius * 2 + 1), 2);
     }
 
-    return (textureColor * (diffuse * (1.0f - shadow) * inten + ambient) + textureColor * specular * (1.0f - shadow) * inten) * LightColor;
+    return (textureColor * (diffuse * (1.0f - shadow) * inten + ambient) + textureColor.r * specular * (1.0f - shadow) * inten) * LightColor;
 }
 
 void main()
