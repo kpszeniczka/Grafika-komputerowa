@@ -66,10 +66,10 @@ GLuint lightIndices[] = {
 };
 
 GLfloat floorVertices[] = {
-	0.5f,  0.0f, 0.5f,    0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-	-0.5f, 0.0f, 0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	0.5f,  0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-	-0.5f, 0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+	0.5f,  0.0f, 0.5f,    0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+	-0.5f, 0.0f, 0.5f,	 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+	0.5f,  0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f,	 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 };
 
 GLuint floorIndices[] = {
@@ -172,7 +172,7 @@ int main()
 	glm::vec3 floorPos = glm::vec3(0.0f, -5.0f, 0.0f);
 	glm::mat4 floorModel = glm::mat4(1.0f);
 	floorModel = glm::translate(floorModel, floorPos);
-	floorModel = glm::scale(floorModel, glm::vec3(100.0f));
+	floorModel = glm::scale(floorModel, glm::vec3(10.0f));
 
 	floorShader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));
@@ -225,20 +225,19 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	float aspect = (float)shadowWidth / (float)shadowHeight;
-	float near = 18.0f;
+	float near = 18.5f;
 	float far = floorPos.y;
 
 	glm::mat4 perspectiveProjection = glm::perspective(glm::radians(45.0f), aspect, near, far);
-	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	glm::mat4 lightView = glm::lookAt(cubePos, glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glm::mat4 lightProjection = perspectiveProjection * lightView;
 
 	shadowProgram.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
-	floorShader.Activate();
-	glUniformMatrix4fv(glGetUniformLocation(shadowProgram.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
 
-	
+	floorShader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "u_LightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -290,10 +289,10 @@ int main()
 		floorShader.Activate();
 		Dzialaj.Bind();
 		glUniform1i(glGetUniformLocation(floorShader.ID, "textureSampler"), 0);
+
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, shadowTextureID);
 		glUniform1i(glGetUniformLocation(floorShader.ID, "shadowMap"), 1);
-		//Dzialaj.Bind(0);
 		floorVAO.Bind();
 
 		glUniformMatrix4fv(glGetUniformLocation(floorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(floorModel));

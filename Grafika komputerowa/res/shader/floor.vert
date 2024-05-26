@@ -17,8 +17,8 @@ void main()
 {
     gl_Position = camMatrix * model * vec4(position, 1.0f);
 
-    v_Position = (model * vec4(position, 1.0f)).xyz; // Transform to world space
-    v_Normals = mat3(transpose(inverse(model))) * normals; // Transform normals to world space
-    v_TexCoord = texCoords;
-    v_FragPositionLight = u_LightProjection * vec4(position, 1.0f);
+	v_Position = position;
+	v_Normals = normals;
+	v_TexCoord = texCoords;
+	v_FragPositionLight = u_LightProjection * vec4(position, 1.0f);
 }
